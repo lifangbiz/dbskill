@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}{{ t.detail }} - {{ api_key.prefix }} - {{ t.title }}{% endblock %}
+{% block content %}
+  <h1>{{ t.detail }}: {{ api_key.prefix }}{% if api_key.name %} ({{ api_key.name }}){% endif %}</h1>
+  {% if request.query_params.get('generated_key') %}
+  <div class="notice">
+    {{ t.generated_key }}: <code>{{ request.query_params.get('generated_key') }}</code>
+  </div>
+  {% endif %}
+  <p><a href="/admin/ui/api-keys?lang={{ lang }}">{{ t.back_to_api_keys }}</a></p>
+
+  <div class="card">
+    <div class="card-body">
+      <h3>{{ t.name }}</h3>
+      <form method="post" action="/admin/ui/api-keys/{{ api_key.id }}/update">
+        <input type="hidden" name="lang" value="{{ lang }}" />
+        <label for="name">{{ t.key_name }}</label>
+        <input id="name" name="name" value="{{ api_key.name or '' }}" placeholder="{{ t.key_name_optional }}" />
+        <div class="form-actions"><button type="submit" class="btn btn-primary">{{ t.save }}</button></div>
+      </form>
+      <h3 style="margin-top:1.25rem;">{{ t.status }}</h3>
+      <p>{% if api_key.enabled %}<span class="badge badge-ok">{{ t.enabled }}</span>{% else %}<span class="badge badge-off">{{ t.disabled }}</span>{% endif %}</p>
+      <h3 style="margin-top:1rem;">{{ t.key }}</h3>
+      <p><code>{{ api_key.raw_key[:6] }}****{{ api_key.raw_key[-4:] if api_key.raw_key|length > 10 else '****' }}</code></p>
+      <div class="form-actions" style="margin-top:0.75rem;">
+        <form method="post" action="/admin/ui/api-keys/{{ api_key.id }}/regenerate" class="inline-form" onsubmit="return confirm('{{ t.regenerate_key }}?');">
+          <button type="submit" class="btn btn-secondary">{{ t.regenerate_key }}</button>
+        </form>
+        <form method="post" action="/admin/ui/api-keys/{{ api_key.id }}/toggle-enabled" class="inline-form">
+          {% if api_key.enabled %}
+          <button type="submit" class="btn btn-secondary">{{ t.disable }}</button>
+          {% else %}
+          <button type="submit" class="btn btn-primary">{{ t.enable }}</button>
+          {% endif %}
+        </form>
+        <form method="post" action="/admin/ui/api-keys/{{ api_key.id }}/delete" class="inline-form" onsubmit="return confirm('{{ t.delete }}?');">
+          <button type="submit" class="btn btn-danger">{{ t.delete }}</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <h3>{{ t.assigned_databases }}</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>{{ t.alias }}</th>
+            <th>{{ t.permission_level }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in api_key.assignments %}
+          <tr>
+            <td>{{ a.database.alias }}</td>
+            <td>{{ a.permission_level }}</td>
+            <td>
+              <form method="post" action="/admin/ui/api-keys/{{ api_key.id }}/databases/unbind" class="inline-form" onsubmit="return confirm('{{ t.unbind }}?');">
+                <input type="hidden" name="database_id" value="{{ a.database.id }}" />
+                <button type="submit" class="btn btn-danger" style="padding:0.25rem 0.5rem;font-size:0.8rem;">{{ t.unbind }}</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+          {% if not api_key.assignments %}
+          <tr><td colspan="3">—</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+      <h3 style="margin-top:1rem;">{{ t.bind_database }}</h3>
+      <form method="post" action="/admin/ui/api-keys/{{ api_key.id }}/databases">
+        {% if unbound_databases %}
+        <p>{{ t.alias }} ({{ t.bind_selected }}):</p>
+        <ul class="db-checkbox-list">
+          {% for d in unbound_databases %}
+          <li><label><input type="checkbox" name="database_id" value="{{ d.id }}" /> {{ d.alias }}</label></li>
+          {% endfor %}
+        </ul>
+        <label for="permission_level">{{ t.permission_level }}</label>
+        <select id="permission_level" name="permission_level">
+          <option value="readonly">readonly</option>
+          <option value="readwrite">readwrite</option>
+        </select>
+        <div class="form-actions"><button type="submit" class="btn btn-primary">{{ t.bind_selected }}</button></div>
+        {% else %}
+        <p>{{ t.all_databases_assigned }}</p>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+{% endblock %}

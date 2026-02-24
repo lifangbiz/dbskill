@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ t.api_keys }} - {{ t.title }}{% endblock %}
+{% block extra_head %}
+  <style>.key-display { cursor: pointer; font-family: monospace; } .key-display:hover { text-decoration: underline; }</style>
+{% endblock %}
+{% block content %}
+  <h1>{{ t.api_keys }}</h1>
+  {% if request.query_params.get('generated_key') %}
+  <div class="notice">
+    {{ t.generated_key }}: <code>{{ request.query_params.get('generated_key') }}</code>
+  </div>
+  {% endif %}
+  <p><a href="/admin/ui/api-keys/new?lang={{ lang }}" class="btn btn-primary">{{ t.new_api_key }}</a></p>
+  <div class="card">
+    <div class="card-body">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ t.key_name }}</th>
+            <th>{{ t.key }}</th>
+            <th>{{ t.assigned_databases }}</th>
+            <th>{{ t.status }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for k in api_keys %}
+          {% set full_key = k.raw_key %}
+          {% set masked_key = (full_key[:6] + '****' + full_key[-4:]) if (full_key|length > 10) else ((full_key[:3] + '****' + full_key[-1:]) if (full_key|length > 4) else (full_key[:2] + '****')) %}
+          <tr>
+            <td>{{ k.name or '—' }}</td>
+            <td>
+              <span class="key-display" data-masked="{{ masked_key }}" data-full="{{ full_key }}" title="{{ t.click_to_toggle }}">{{ masked_key }}</span>
+            </td>
+            <td>{% for a in k.assignments %}{{ a.database.alias }} ({{ a.permission_level }}){% if not loop.last %}; {% endif %}{% endfor %}{% if not k.assignments %}—{% endif %}</td>
+            <td>{% if k.enabled %}<span class="badge badge-ok">{{ t.enabled }}</span>{% else %}<span class="badge badge-off">{{ t.disabled }}</span>{% endif %}</td>
+            <td>
+              <a href="/admin/ui/api-keys/{{ k.id }}?lang={{ lang }}" class="btn btn-primary" style="padding:0.25rem 0.5rem;font-size:0.8rem;">{{ t.detail }}</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if total_pages > 1 %}
+      <div class="pagination" style="margin-top:1rem;display:flex;align-items:center;gap:0.5rem;">
+        {% if page > 1 %}
+        <a href="/admin/ui/api-keys?page={{ page - 1 }}&per_page={{ per_page }}&lang={{ lang }}" class="btn btn-secondary">{{ t.prev_page }}</a>
+        {% endif %}
+        <span>{{ t.page_x_of_y.replace('{page}', page|string).replace('{total}', total_pages|string) }}</span>
+        {% if page < total_pages %}
+        <a href="/admin/ui/api-keys?page={{ page + 1 }}&per_page={{ per_page }}&lang={{ lang }}" class="btn btn-secondary">{{ t.next_page }}</a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('.key-display').forEach(function(el) {
+      el.addEventListener('click', function() {
+        var masked = this.dataset.masked;
+        var full = this.dataset.full;
+        this.textContent = this.textContent === full ? masked : full;
+      });
+    });
+  </script>
+{% endblock %}

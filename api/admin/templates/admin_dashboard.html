@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ t.title }}{% endblock %}
+{% block content %}
+  <h1>{{ t.dashboard }}</h1>
+  <div class="card">
+    <div class="card-body">
+      <p style="margin:0 0 1rem; color:#6b7280;">{{ t.title }} {{ t.overview }}</p>
+      <table style="max-width: 400px;">
+        <tbody>
+          <tr><td><a href="/admin/ui/databases?lang={{ lang }}">{{ t.databases }}</a></td><td>{{ databases_count }}</td></tr>
+          <tr><td><a href="/admin/ui/api-keys?lang={{ lang }}">{{ t.api_keys }}</a></td><td>{{ api_keys_count }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

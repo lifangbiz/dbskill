@@ -1,0 +1,5 @@
+# 仅 Skill 本地/API 模式所需依赖（不含 Web 服务端）
+PyYAML>=6.0.0
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+pymysql>=1.1.0

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ t.edit_account }} - {{ t.title }}{% endblock %}
+{% block content %}
+  <h1>{{ t.edit_account }}</h1>
+  <div class="card">
+    <div class="card-body">
+      <form method="post" action="/admin/ui/accounts/{{ account.id }}/edit">
+        <input type="hidden" name="lang" value="{{ lang }}" />
+        <label for="name">{{ t.name }}</label>
+        <input id="name" name="name" value="{{ account.name }}" required style="max-width:320px;" />
+        <label for="permission_level">{{ t.permission }}</label>
+        <select id="permission_level" name="permission_level" style="max-width:200px;">
+          <option value="readonly" {{ 'selected' if account.permission_level == 'readonly' else '' }}>readonly</option>
+          <option value="write" {{ 'selected' if account.permission_level == 'write' else '' }}>write</option>
+          <option value="full" {{ 'selected' if account.permission_level == 'full' else '' }}>full</option>
+        </select>
+        <label for="db_config_ref">{{ t.db_ref }}</label>
+        <input id="db_config_ref" name="db_config_ref" value="{{ account.db_config_ref or '' }}" placeholder="{{ t.default_db_alias_placeholder }}" style="max-width:320px;" />
+        <label>{{ t.assign_dbs }}</label>
+        {% for d in databases %}
+        <label style="display:inline-block;margin-right:1rem;font-weight:normal;"><input type="checkbox" name="database_ids" value="{{ d.id }}" {% if d.id in assigned_db_ids %}checked{% endif %} /> {{ d.alias }}</label>
+        {% endfor %}
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">{{ t.save }}</button>
+          <a href="/admin/ui/accounts?lang={{ lang }}" class="btn btn-secondary">{{ t.cancel }}</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

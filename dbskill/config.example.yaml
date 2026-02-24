@@ -1,0 +1,44 @@
+# 示例配置文件，仅供参考。
+# 每个 databases.<别名> 必须配置 mode：direct（直连）或 api（通过 HTTP 调用远程服务）。
+
+databases:
+  # ----- Direct 模式示例：脚本直连数据库 -----
+  main:
+    mode: direct
+    type: postgres
+    host: localhost
+    port: 5432
+    user: postgres
+    password: example
+    database: mydb
+    permission: full
+
+  reporting:
+    mode: direct
+    type: mysql
+    host: localhost
+    port: 3306
+    user: report
+    password: example
+    database: reporting_db
+    permission: readonly
+
+  local_sqlite:
+    mode: direct
+    type: sqlite
+    database: ./local.db
+    permission: write
+
+  # ----- API 模式示例：通过 DBSkill 远程服务访问 -----
+  analytics:
+    mode: api
+    api_url: https://your-dbskill-server.example.com
+    api_token: sk_xxx
+    permission: readonly
+
+default_db: main
+
+audit:
+  enabled: true
+  log_dir: ./logs/audit
+  retention_days: 30

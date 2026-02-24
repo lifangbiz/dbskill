@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ t.edit_database }} - {{ t.title }}{% endblock %}
+{% block content %}
+  <h1>{{ t.edit_database }}</h1>
+  <div class="card">
+    <div class="card-body">
+      <form method="post" action="/admin/ui/databases/{{ database.id }}/edit">
+        <input type="hidden" name="lang" value="{{ lang }}" />
+        <div class="form-grid">
+          <div><label for="alias">{{ t.alias }}</label><input id="alias" name="alias" value="{{ database.alias }}" required /></div>
+          <div><label for="type">{{ t.type }}</label><select id="type" name="type">
+            <option value="postgres" {{ 'selected' if database.type == 'postgres' else '' }}>PostgreSQL</option>
+            <option value="mysql" {{ 'selected' if database.type == 'mysql' else '' }}>MySQL</option>
+            <option value="mariadb" {{ 'selected' if database.type == 'mariadb' else '' }}>MariaDB</option>
+            <option value="oracle" {{ 'selected' if database.type == 'oracle' else '' }}>Oracle</option>
+            <option value="mssql" {{ 'selected' if database.type == 'mssql' else '' }}>SQL Server</option>
+            <option value="db2" {{ 'selected' if database.type == 'db2' else '' }}>DB2</option>
+            <option value="dm" {{ 'selected' if database.type == 'dm' else '' }}>{{ t.db_type_dm }}</option>
+            <option value="kingbase" {{ 'selected' if database.type == 'kingbase' else '' }}>{{ t.db_type_kingbase }}</option>
+            <option value="sqlite" {{ 'selected' if database.type == 'sqlite' else '' }}>SQLite</option>
+          </select></div>
+          <div><label for="host">{{ t.host }}</label><input id="host" name="host" value="{{ database.host or '' }}" /></div>
+          <div><label for="port">{{ t.port }}</label><input id="port" name="port" type="number" value="{{ database.port or '' }}" /></div>
+          <div><label for="user">{{ t.user }}</label><input id="user" name="user" value="{{ database.user or '' }}" /></div>
+          <div><label for="password">{{ t.password }}</label><input id="password" name="password" type="password" placeholder="{{ t.password_leave_blank }}" /></div>
+          <div><label for="database">{{ t.database }}</label><input id="database" name="database" value="{{ database.database or '' }}" placeholder="{{ t.database_placeholder }}" /></div>
+          <div><label for="permission_level">{{ t.permission }}</label><select id="permission_level" name="permission_level"><option value="readonly" {{ 'selected' if database.permission_level == 'readonly' else '' }}>readonly</option><option value="write" {{ 'selected' if database.permission_level == 'write' else '' }}>write</option><option value="full" {{ 'selected' if database.permission_level == 'full' else '' }}>full</option></select></div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">{{ t.save }}</button>
+          <a href="/admin/ui/databases/{{ database.id }}?lang={{ lang }}" class="btn btn-secondary">{{ t.cancel }}</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

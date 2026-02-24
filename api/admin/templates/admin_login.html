@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="{{ 'zh' if lang == 'zh' else 'en' }}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ t.login }} - {{ t.title }}</title>
+  <style>
+    :root { --primary: #2563eb; --primary-hover: #1d4ed8; --card-bg: #fff; --card-border: #e4e6eb; --radius: 8px; --shadow: 0 1px 3px rgba(0,0,0,.08); }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; color: #1f2937; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    .login-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 2rem; width: 100%; max-width: 360px; }
+    .login-box h1 { margin: 0 0 1.5rem; font-size: 1.35rem; font-weight: 600; }
+    .lang-switch { font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem; }
+    .lang-switch a { color: var(--primary); text-decoration: none; }
+    label { display: block; margin-bottom: 0.25rem; font-size: 0.9rem; font-weight: 500; }
+    input { width: 100%; padding: 0.6rem 0.75rem; margin-bottom: 1rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.95rem; }
+    input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,.2); }
+    button[type="submit"] { width: 100%; padding: 0.6rem; font-size: 0.95rem; font-weight: 500; border-radius: 6px; border: none; background: var(--primary); color: #fff; cursor: pointer; }
+    button[type="submit"]:hover { background: var(--primary-hover); }
+    .error { color: #dc2626; margin-bottom: 1rem; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <div class="lang-switch"><a href="?lang=en">English</a> &middot; <a href="?lang=zh">中文</a></div>
+    <h1>{{ t.login }}</h1>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    <form method="post" action="/admin/login">
+      <label for="username">{{ t.username }}</label>
+      <input id="username" name="username" required autofocus />
+      <label for="password">{{ t.password }}</label>
+      <input id="password" name="password" type="password" required />
+      <button type="submit">{{ t.login }}</button>
+    </form>
+  </div>
+</body>
+</html>

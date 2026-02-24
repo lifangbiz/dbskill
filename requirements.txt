@@ -1,0 +1,18 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.7.0
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+pymysql>=1.1.0
+aiosqlite>=0.20.0
+PyYAML>=6.0.0
+passlib>=1.7.4
+python-multipart>=0.0.6
+itsdangerous>=2.0.0
+
+# Optional: Oracle (oracledb), SQL Server (pyodbc), DB2 (ibm_db + ibm_db_sa)
+# 达梦 dm 需从 DM 安装目录安装 dmPython 与 sqlalchemy_dm；金仓 kingbase 复用 psycopg2
+oracledb>=2.0.0
+pyodbc>=5.0.0
+ibm_db>=3.2.0
+ibm_db_sa>=0.4.0

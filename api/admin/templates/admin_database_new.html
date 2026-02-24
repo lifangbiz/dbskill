@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}{{ t.new_database }} - {{ t.title }}{% endblock %}
+{% block content %}
+  <h1>{{ t.new_database }}</h1>
+  <div class="card db-form-card">
+    <div class="card-body">
+      <form method="post" action="/admin/ui/databases" id="db-form">
+        <input type="hidden" name="lang" value="{{ lang }}" />
+        <section class="form-section">
+          <h3 class="form-section-title">{{ t.alias }} &amp; {{ t.type }}</h3>
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label for="db_alias">{{ t.alias }}</label>
+              <input id="db_alias" name="alias" required placeholder="e.g. my_app_db" />
+            </div>
+            <div class="form-group">
+              <label for="db_type">{{ t.type }}</label>
+              <select id="db_type" name="type">
+                <option value="postgres">PostgreSQL</option>
+                <option value="mysql">MySQL</option>
+                <option value="mariadb">MariaDB</option>
+                <option value="oracle">Oracle</option>
+                <option value="mssql">SQL Server</option>
+                <option value="db2">DB2</option>
+                <option value="dm">{{ t.db_type_dm }}</option>
+                <option value="kingbase">{{ t.db_type_kingbase }}</option>
+                <option value="sqlite">SQLite</option>
+              </select>
+            </div>
+          </div>
+        </section>
+        <section class="form-section" id="section-connection">
+          <h3 class="form-section-title">Connection</h3>
+          <div class="form-row form-row-2" id="row-host-port">
+            <div class="form-group">
+              <label for="db_host">{{ t.host }}</label>
+              <input id="db_host" name="host" placeholder="localhost" />
+            </div>
+            <div class="form-group">
+              <label for="db_port">{{ t.port }}</label>
+              <input id="db_port" name="port" type="number" placeholder="5432" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="db_database">{{ t.database }}</label>
+              <input id="db_database" name="database" placeholder="Database name or SQLite file path" />
+            </div>
+          </div>
+        </section>
+        <section class="form-section" id="section-auth">
+          <h3 class="form-section-title">Authentication</h3>
+          <div class="form-row form-row-2">
+            <div class="form-group">
+              <label for="db_user">{{ t.user }}</label>
+              <input id="db_user" name="user" placeholder="username" />
+            </div>
+            <div class="form-group">
+              <label for="db_password">{{ t.password }}</label>
+              <input id="db_password" name="password" type="password" placeholder="••••••••" />
+            </div>
+          </div>
+        </section>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">{{ t.create }}</button>
+          <button type="button" class="btn btn-secondary" id="btn-test-connection">{{ t.test_connection }}</button>
+          <a href="/admin/ui/databases?lang={{ lang }}" class="btn btn-secondary">{{ t.cancel }}</a>
+        </div>
+        <div id="test-connection-result" class="test-result" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+  <style>
+    .db-form-card .card-body { max-width: 560px; }
+    .form-section { margin-bottom: 1.5rem; }
+    .form-section:last-of-type { margin-bottom: 0; }
+    .form-section-title { margin: 0 0 0.75rem; font-size: 0.95rem; font-weight: 600; color: #475569; padding-bottom: 0.35rem; border-bottom: 1px solid #e2e8f0; }
+    .form-row { margin-bottom: 0.75rem; }
+    .form-row:last-child { margin-bottom: 0; }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group label { display: block; margin-bottom: 0.25rem; font-size: 0.85rem; font-weight: 500; color: #374151; }
+    .form-group input, .form-group select { width: 100%; padding: 0.5rem 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; margin-bottom: 0; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,.2); }
+    @media (max-width: 520px) { .form-row-2 { grid-template-columns: 1fr; } }
+    .test-result { margin-top: 0.75rem; font-size: 0.9rem; min-height: 1.5em; }
+    .test-result.success { color: #059669; }
+    .test-result.error { color: #dc2626; }
+  </style>
+  <script>
+    (function() {
+      var typeEl = document.getElementById('db_type');
+      var rowHostPort = document.getElementById('row-host-port');
+      var sectionAuth = document.getElementById('section-auth');
+      var dbInput = document.getElementById('db_database');
+      var placeholders = {
+        postgres: 'database name',
+        mysql: 'database name',
+        mariadb: 'database name',
+        oracle: 'service name or SID',
+        mssql: 'database name',
+        db2: 'database name',
+        dm: 'optional',
+        kingbase: 'database name',
+        sqlite: 'e.g. /path/to/file.db'
+      };
+      function toggle() {
+        var isSqlite = typeEl.value === 'sqlite';
+        rowHostPort.style.display = isSqlite ? 'none' : '';
+        sectionAuth.style.display = isSqlite ? 'none' : '';
+        dbInput.placeholder = placeholders[typeEl.value] || dbInput.placeholder;
+      }
+      typeEl.addEventListener('change', toggle);
+      toggle();
+    })();
+    (function() {
+      var form = document.getElementById('db-form');
+      var btn = document.getElementById('btn-test-connection');
+      var resultEl = document.getElementById('test-connection-result');
+      var msgOk = {{ (t.connection_ok or '') | tojson }};
+      var msgFail = {{ (t.connection_failed or '') | tojson }};
+      btn.addEventListener('click', function() {
+        var type = (document.getElementById('db_type').value || 'postgres').trim();
+        var payload = {
+          type: type,
+          host: (document.getElementById('db_host').value || '').trim() || null,
+          port: null,
+          user: (document.getElementById('db_user').value || '').trim() || null,
+          password: (document.getElementById('db_password').value || '') || null,
+          database: (document.getElementById('db_database').value || '').trim() || null
+        };
+        var portVal = document.getElementById('db_port').value;
+        if (portVal !== '') { var p = parseInt(portVal, 10); if (!isNaN(p)) payload.port = p; }
+        resultEl.textContent = '';
+        resultEl.className = 'test-result';
+        btn.disabled = true;
+        fetch('/admin/api/databases/test-connection', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          credentials: 'same-origin'
+        })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data.ok) {
+              resultEl.textContent = msgOk;
+              resultEl.className = 'test-result success';
+            } else {
+              resultEl.textContent = msgFail + (data.error ? ': ' + data.error : '');
+              resultEl.className = 'test-result error';
+            }
+          })
+          .catch(function(err) {
+            resultEl.textContent = msgFail + ': ' + (err.message || String(err));
+            resultEl.className = 'test-result error';
+          })
+          .finally(function() { btn.disabled = false; });
+      });
+    })();
+  </script>
+{% endblock %}

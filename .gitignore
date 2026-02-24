@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Poetry / pip
+*.egg-info/
+dist/
+build/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs & local data
+logs/
+*.log
+
+# Local DB / admin data
+admin.db
+data/
+
+# 本地配置（仅提交 *example.yaml 示例）
+config.yaml
+server.yaml
+dbskill/config.yaml
+.cursor
+
+# Environment
+.env
+.env.*
+

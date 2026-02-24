@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ t.accounts }} - {{ t.title }}{% endblock %}
+{% block content %}
+  <h1>{{ t.accounts }}</h1>
+  <div class="card">
+    <div class="card-body">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ t.name }}</th>
+            <th>{{ t.permission }}</th>
+            <th>{{ t.db_ref }}</th>
+            <th>{{ t.assign_dbs }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in accounts %}
+          <tr>
+            <td>{{ a.name }}</td>
+            <td>{{ a.permission_level }}</td>
+            <td>{{ a.db_config_ref or '' }}</td>
+            <td>{% for db in a.databases %}{{ db.alias }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+            <td>
+              <a href="/admin/ui/accounts/{{ a.id }}/edit?lang={{ lang }}">{{ t.edit }}</a>
+              <form method="post" action="/admin/ui/accounts/{{ a.id }}/delete" class="inline-form" onsubmit="return confirm('{{ t.delete }}?');">
+                <button type="submit" class="btn btn-danger" style="padding:0.25rem 0.5rem;font-size:0.8rem;">{{ t.delete }}</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <h3>{{ t.new_account }}</h3>
+      <form method="post" action="/admin/ui/accounts">
+        <div class="form-grid">
+          <div><label for="name">{{ t.name }}</label><input id="name" name="name" required /></div>
+          <div><label for="permission_level">{{ t.permission }}</label><select id="permission_level" name="permission_level"><option value="readonly">readonly</option><option value="write">write</option><option value="full">full</option></select></div>
+          <div><label for="db_config_ref">{{ t.db_ref }}</label><input id="db_config_ref" name="db_config_ref" placeholder="{{ t.default_db_alias_placeholder }}" /></div>
+        </div>
+        <label>{{ t.assign_dbs }}</label>
+        {% for d in databases %}
+        <label style="display:inline-block;margin-right:1rem;font-weight:normal;"><input type="checkbox" name="database_ids" value="{{ d.id }}" /> {{ d.alias }}</label>
+        {% endfor %}
+        <div class="form-actions"><button type="submit" class="btn btn-primary">{{ t.create }}</button></div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

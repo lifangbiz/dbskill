@@ -1,0 +1,25 @@
+# Web 服务端专用配置（仅 API 服务读取，Skill 不读取）
+# 复制为 server.yaml 并按需修改；未提供 server.yaml 时使用默认值（不写文件日志、API 审计默认路径）。
+# 第三方数据库连接均在管理后台写入 admin.db，无需在此或 config.yaml 中配置。
+
+# 管理后台会话密钥。生产环境务必在 server.yaml 中设置，勿使用默认值
+session_secret: your-secret-change-in-production
+
+# 管理后台与 API 元数据存储（SQLite）。可选；未配置时默认使用项目根目录下的 admin.db
+admin_db:
+  path: ./admin.db
+
+# 后台应用日志
+logging:
+  file: ./logs/app.log
+  level: INFO
+  rotation:
+    type: size
+    max_bytes: 10485760   # 10MB
+    backup_count: 5
+  # 按天切分示例：type: time, when: midnight, interval: 1, backup_count: 30
+
+# API 请求审计日志（仅存数据库 admin.db，不写文件）
+api_audit:
+  enabled: true
+  retention_days: 30

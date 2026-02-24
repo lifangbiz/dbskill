@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ t.manage_databases }} - {{ api_key.prefix }} - {{ t.title }}{% endblock %}
+{% block content %}
+  <h1>{{ t.manage_databases }}: {{ api_key.prefix }}{% if api_key.name %} ({{ api_key.name }}){% endif %}</h1>
+  <p><a href="/admin/ui/api-keys?lang={{ lang }}">{{ t.back_to_api_keys }}</a></p>
+  <div class="card">
+    <div class="card-body">
+      <h3>{{ t.assigned_databases }}</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>{{ t.alias }}</th>
+            <th>{{ t.permission_level }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in api_key.assignments %}
+          <tr>
+            <td>{{ a.database.alias }}</td>
+            <td>{{ a.permission_level }}</td>
+            <td>
+              <form method="post" action="/admin/ui/api-keys/{{ api_key.id }}/databases/unbind" class="inline-form" onsubmit="return confirm('{{ t.unbind }}?');">
+                <input type="hidden" name="database_id" value="{{ a.database.id }}" />
+                <button type="submit" class="btn btn-danger" style="padding:0.25rem 0.5rem;font-size:0.8rem;">{{ t.unbind }}</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+          {% if not api_key.assignments %}
+          <tr><td colspan="3">—</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+      <h3>{{ t.bind_database }}</h3>
+      <form method="post" action="/admin/ui/api-keys/{{ api_key.id }}/databases">
+        {% if unbound_databases %}
+        <p>{{ t.alias }} ({{ t.bind_selected }}):</p>
+        <ul class="db-checkbox-list">
+          {% for d in unbound_databases %}
+          <li><label><input type="checkbox" name="database_id" value="{{ d.id }}" /> {{ d.alias }}</label></li>
+          {% endfor %}
+        </ul>
+        <label for="permission_level">{{ t.permission_level }}</label>
+        <select id="permission_level" name="permission_level">
+          <option value="readonly">readonly</option>
+          <option value="readwrite">readwrite</option>
+        </select>
+        <div class="form-actions"><button type="submit" class="btn btn-primary">{{ t.bind_selected }}</button></div>
+        {% else %}
+        <p>{{ t.all_databases_assigned }}</p>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="{{ 'zh' if lang == 'zh' else 'en' }}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}{{ t.title }}{% endblock %}</title>
+  <style>
+    :root {
+      --side-bg: #1a1d24;
+      --side-text: #e2e4e9;
+      --side-hover: #2d323c;
+      --side-width: 220px;
+      --main-bg: #f0f2f5;
+      --card-bg: #fff;
+      --card-border: #e4e6eb;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --radius: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--main-bg); color: #1f2937; min-height: 100vh; display: flex; }
+    .layout-side {
+      width: var(--side-width); background: var(--side-bg); color: var(--side-text); flex-shrink: 0; min-height: 100vh; padding: 1.25rem 0;
+    }
+    .layout-side .brand { padding: 0 1rem 1.25rem; font-weight: 700; font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 1rem; }
+    .layout-side .brand a { color: inherit; text-decoration: none; }
+    .layout-side nav a { display: block; padding: 0.5rem 1rem; color: var(--side-text); text-decoration: none; font-size: 0.9rem; border-radius: 4px; margin: 0 0.5rem; }
+    .layout-side nav a:hover { background: var(--side-hover); }
+    .layout-side nav a.active { background: var(--side-hover); color: #fff; }
+    .layout-side .nav-divider { height: 1px; background: rgba(255,255,255,.08); margin: 0.75rem 1rem; }
+    .layout-side nav .nav-item { display: block; padding: 0.5rem 1rem; color: var(--side-text); font-size: 0.9rem; border-radius: 4px; margin: 0 0.5rem; border: none; background: none; width: 100%; text-align: left; cursor: pointer; font-family: inherit; }
+    .layout-side nav .nav-item:hover { background: var(--side-hover); color: #fff; }
+    .layout-side nav .nav-form { margin: 0; padding: 0; display: block; }
+    .layout-main { flex: 1; padding: 1.5rem 2rem; overflow-x: auto; }
+    .layout-main h1 { margin: 0 0 1rem; font-size: 1.5rem; font-weight: 600; }
+    .layout-main h2 { margin: 1.5rem 0 0.75rem; font-size: 1.2rem; font-weight: 600; }
+    .layout-main h3 { margin: 0 0 0.75rem; font-size: 1rem; font-weight: 600; }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 1.5rem; overflow: hidden; }
+    .card-body { padding: 1.25rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid var(--card-border); }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+    label { display: block; margin-bottom: 0.25rem; font-size: 0.85rem; font-weight: 500; color: #374151; }
+    input, select { width: 100%; padding: 0.5rem 0.6rem; margin-bottom: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; }
+    input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,.2); }
+    button[type="submit"], .btn { display: inline-block; padding: 0.5rem 1rem; font-size: 0.9rem; font-weight: 500; border-radius: 6px; cursor: pointer; border: none; text-decoration: none; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: var(--danger-hover); }
+    .btn-secondary { background: #e5e7eb; color: #374151; }
+    .btn-secondary:hover { background: #d1d5db; }
+    .notice { padding: 0.75rem 1rem; background: #fef3c7; border: 1px solid #f59e0b; border-radius: var(--radius); margin-bottom: 1rem; font-size: 0.9rem; color: #92400e; }
+    .notice code { background: rgba(0,0,0,.06); padding: 0.2rem 0.4rem; border-radius: 4px; }
+    .error { color: var(--danger); margin-bottom: 1rem; font-size: 0.9rem; }
+    .success { color: #059669; margin-bottom: 1rem; font-size: 0.9rem; }
+    .lang-switch { font-size: 0.85rem; color: #6b7280; margin-bottom: 1rem; }
+    .lang-switch a { color: var(--primary); text-decoration: none; }
+    .lang-switch a:hover { text-decoration: underline; }
+    .form-actions { margin-top: 1rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0 1.5rem; }
+    .form-grid label { margin-bottom: 0.15rem; }
+    .form-grid input, .form-grid select { margin-bottom: 0.75rem; }
+    .inline-form { display: inline; }
+    .inline-form button { margin-left: 0.25rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.5rem; font-size: 0.75rem; border-radius: 4px; font-weight: 500; }
+    .badge-ok { background: #d1fae5; color: #065f46; }
+    .badge-off { background: #fee2e2; color: #991b1b; }
+    .db-checkbox-list { list-style: none; margin: 0 0 0.75rem; padding: 0; }
+    .db-checkbox-list li { margin-bottom: 0.35rem; }
+    .db-checkbox-list label { margin-bottom: 0; font-weight: normal; display: inline-flex; align-items: center; gap: 0.35rem; }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <aside class="layout-side">
+    <div class="brand"><a href="/admin/ui?lang={{ lang }}">{{ t.title }}</a></div>
+    <nav>
+      <a href="/admin/ui?lang={{ lang }}" class="{% if active_section == 'dashboard' %}active{% endif %}">{{ t.dashboard }}</a>
+      <a href="/admin/ui/databases?lang={{ lang }}" class="{% if active_section == 'databases' %}active{% endif %}">{{ t.databases }}</a>
+      <a href="/admin/ui/api-keys?lang={{ lang }}" class="{% if active_section == 'api_keys' %}active{% endif %}">{{ t.api_keys }}</a>
+      <a href="/admin/ui/audit-logs?lang={{ lang }}" class="{% if active_section == 'audit_logs' %}active{% endif %}">{{ t.audit_logs }}</a>
+      <div class="nav-divider"></div>
+      <a href="/admin/ui/change-password?lang={{ lang }}">{{ t.change_password }}</a>
+      <form method="post" action="/admin/logout" class="nav-form">
+        <button type="submit" class="nav-item">{{ t.logout }}</button>
+      </form>
+    </nav>
+  </aside>
+  <main class="layout-main">
+    <div class="lang-switch">
+      <a href="?lang=en">English</a> &middot; <a href="?lang=zh">中文</a>
+    </div>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

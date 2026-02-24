@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ t.detail }} - {{ database.alias }} - {{ t.title }}{% endblock %}
+{% block content %}
+  <h1>{{ t.detail }}: {{ database.alias }}</h1>
+  <p><a href="/admin/ui/databases?lang={{ lang }}">{{ t.back_to_databases }}</a></p>
+
+  <div class="card">
+    <div class="card-body">
+      <h3>{{ t.alias }} &amp; {{ t.type }}</h3>
+      <p><strong>{{ t.alias }}</strong> {{ database.alias }} &middot; <strong>{{ t.type }}</strong> {{ database.type }}</p>
+      <h3 style="margin-top:1rem;">Connection</h3>
+      <p>{{ t.host }}: {{ database.host or '—' }} &middot; {{ t.port }}: {{ database.port or '—' }} &middot; {{ t.user }}: {{ database.user or '—' }} &middot; {{ t.database }}: {{ database.database or '—' }}</p>
+      <h3 style="margin-top:1rem;">{{ t.bound_keys }}</h3>
+      <p>{% for a in database.key_assignments %}{{ a.api_key.prefix }}{% if a.api_key.name %} ({{ a.api_key.name }}){% endif %}: {{ a.permission_level }}{% if not loop.last %}; {% endif %}{% endfor %}{% if not database.key_assignments %}—{% endif %}</p>
+      <div class="form-actions" style="margin-top:1rem;">
+        <a href="/admin/ui/databases/{{ database.id }}/edit?lang={{ lang }}" class="btn btn-primary">{{ t.edit }}</a>
+        <button type="button" class="btn btn-secondary" id="btn-test-connection">{{ t.test_connection }}</button>
+        <form method="post" action="/admin/ui/databases/{{ database.id }}/delete" class="inline-form" onsubmit="return confirm('{{ t.delete }}?');">
+          <button type="submit" class="btn btn-danger">{{ t.delete }}</button>
+        </form>
+      </div>
+      <div id="test-connection-result" class="test-result" aria-live="polite" style="margin-top:0.75rem;font-size:0.9rem;min-height:1.5em;"></div>
+    </div>
+  </div>
+  <style>
+    .test-result.success { color: #059669; }
+    .test-result.error { color: #dc2626; }
+  </style>
+  <script>
+    (function() {
+      var btn = document.getElementById('btn-test-connection');
+      var resultEl = document.getElementById('test-connection-result');
+      var msgOk = {{ (t.connection_ok or '') | tojson }};
+      var msgFail = {{ (t.connection_failed or '') | tojson }};
+      var dbId = {{ database.id }};
+      btn.addEventListener('click', function() {
+        resultEl.textContent = '';
+        resultEl.className = 'test-result';
+        btn.disabled = true;
+        fetch('/admin/api/databases/' + dbId + '/test-connection', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{}',
+          credentials: 'same-origin'
+        })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data.ok) {
+              resultEl.textContent = msgOk;
+              resultEl.className = 'test-result success';
+            } else {
+              resultEl.textContent = msgFail + (data.error ? ': ' + data.error : '');
+              resultEl.className = 'test-result error';
+            }
+          })
+          .catch(function(err) {
+            resultEl.textContent = msgFail + ': ' + (err.message || String(err));
+            resultEl.className = 'test-result error';
+          })
+          .finally(function() { btn.disabled = false; });
+      });
+    })();
+  </script>
+{% endblock %}

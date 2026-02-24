@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ t.databases }} - {{ t.title }}{% endblock %}
+{% block content %}
+  <h1>{{ t.databases }}</h1>
+  <p><a href="/admin/ui/databases/new?lang={{ lang }}" class="btn btn-primary">{{ t.new_database }}</a></p>
+  <div class="card">
+    <div class="card-body">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ t.alias }}</th>
+            <th>{{ t.type }}</th>
+            <th>{{ t.host }}</th>
+            <th>{{ t.bound_keys }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in databases %}
+          <tr>
+            <td>{{ d.alias }}</td>
+            <td>{{ d.type }}</td>
+            <td>{{ d.host or '' }}</td>
+            <td>{% for a in d.key_assignments %}{{ a.api_key.prefix }}{% if a.api_key.name %} ({{ a.api_key.name }}){% endif %}: {{ a.permission_level }}{% if not loop.last %}; {% endif %}{% endfor %}{% if not d.key_assignments %}—{% endif %}</td>
+            <td>
+              <a href="/admin/ui/databases/{{ d.id }}?lang={{ lang }}" class="btn btn-primary" style="padding:0.25rem 0.5rem;font-size:0.8rem;">{{ t.detail }}</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if total_pages > 1 %}
+      <div class="pagination" style="margin-top:1rem;display:flex;align-items:center;gap:0.5rem;">
+        {% if page > 1 %}
+        <a href="/admin/ui/databases?page={{ page - 1 }}&per_page={{ per_page }}&lang={{ lang }}" class="btn btn-secondary">{{ t.prev_page }}</a>
+        {% endif %}
+        <span>{{ t.page_x_of_y.replace('{page}', page|string).replace('{total}', total_pages|string) }}</span>
+        {% if page < total_pages %}
+        <a href="/admin/ui/databases?page={{ page + 1 }}&per_page={{ per_page }}&lang={{ lang }}" class="btn btn-secondary">{{ t.next_page }}</a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

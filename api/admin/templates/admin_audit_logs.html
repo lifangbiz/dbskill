@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}{{ t.audit_logs }} - {{ t.title }}{% endblock %}
+{% block content %}
+  <h1>{{ t.audit_logs }}</h1>
+  <p class="muted" style="font-size:0.85rem;">{{ t.data_source }}: <code>{{ admin_db_path }}</code> · {{ t.total_entries.replace('{n}', total|string) }}</p>
+  <div class="card" style="margin-bottom: 1rem;">
+    <div class="card-body">
+      <form method="get" action="/admin/ui/audit-logs" class="audit-filters">
+        <input type="hidden" name="lang" value="{{ lang }}" />
+        <div class="form-row form-row-3">
+          <div class="form-group">
+            <label for="filter_db_alias">{{ t.filter_by_database }}</label>
+            <select id="filter_db_alias" name="db_alias">
+              <option value="">—</option>
+              {% for d in databases %}
+              <option value="{{ d.alias }}" {% if filter_db_alias == d.alias %}selected{% endif %}>{{ d.alias }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="filter_api_key">{{ t.filter_by_api_key }}</label>
+            <select id="filter_api_key" name="api_key">
+              <option value="">—</option>
+              <option value="__unnamed" {% if filter_api_key == '__unnamed' %}selected{% endif %}>{{ t.unnamed_keys }}</option>
+              {% for k in api_keys %}
+              {% if k.name %}
+              <option value="{{ k.name }}" {% if filter_api_key == k.name %}selected{% endif %}>{{ k.prefix }} ({{ k.name }})</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>{{ t.filter_by_date }}</label>
+            <div class="date-range">
+              <input id="filter_date_from" name="date_from" type="date" value="{{ filter_date_from }}" placeholder="{{ t.date_from }}" />
+              <span class="date-sep">–</span>
+              <input id="filter_date_to" name="date_to" type="date" value="{{ filter_date_to }}" placeholder="{{ t.date_to }}" />
+            </div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">{{ t.filter_apply }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      {% if entries %}
+      <table>
+        <thead>
+          <tr>
+            <th>{{ t.audit_time }}</th>
+            <th>{{ t.trace_id }}</th>
+            <th>{{ t.path }}</th>
+            <th>{{ t.method }}</th>
+            <th>{{ t.filter_by_database }}</th>
+            <th>{{ t.filter_by_api_key }}</th>
+            <th>{{ t.client_ip }}</th>
+            <th>{{ t.sql_preview }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in entries %}
+          <tr>
+            <td>{{ e.get('ts') or '—' }}</td>
+            <td><code style="font-size:0.8rem;">{{ (e.get('trace_id') or '—')[:12] }}</code></td>
+            <td>{{ e.get('path') or '—' }}</td>
+            <td>{{ e.get('method') or '—' }}</td>
+            <td>{{ e.get('db_alias') or '—' }}</td>
+            <td>{{ e.get('api_key_name') or '—' }}</td>
+            <td>{{ e.get('client_ip') or '—' }}</td>
+            <td><code class="sql-full" title="{{ (e.get('sql') or '') }}">{{ (e.get('sql') or '—') }}</code></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if total_pages > 1 %}
+      <div class="pagination" style="margin-top:1rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+        {% if page > 1 %}
+        <a href="/admin/ui/audit-logs?page={{ page - 1 }}&per_page={{ per_page }}&lang={{ lang }}{% if filter_db_alias %}&db_alias={{ filter_db_alias }}{% endif %}{% if filter_api_key %}&api_key={{ filter_api_key | urlencode }}{% endif %}{% if filter_date_from %}&date_from={{ filter_date_from }}{% endif %}{% if filter_date_to %}&date_to={{ filter_date_to }}{% endif %}" class="btn btn-secondary">{{ t.prev_page }}</a>
+        {% endif %}
+        <span>{{ t.page_x_of_y.replace('{page}', page|string).replace('{total}', total_pages|string) }}</span>
+        {% if page < total_pages %}
+        <a href="/admin/ui/audit-logs?page={{ page + 1 }}&per_page={{ per_page }}&lang={{ lang }}{% if filter_db_alias %}&db_alias={{ filter_db_alias }}{% endif %}{% if filter_api_key %}&api_key={{ filter_api_key | urlencode }}{% endif %}{% if filter_date_from %}&date_from={{ filter_date_from }}{% endif %}{% if filter_date_to %}&date_to={{ filter_date_to }}{% endif %}" class="btn btn-secondary">{{ t.next_page }}</a>
+        {% endif %}
+      </div>
+      {% endif %}
+      {% else %}
+      <p class="muted">{{ t.no_audit_logs }}</p>
+      {% endif %}
+    </div>
+  </div>
+  <style>
+    .audit-filters .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem; }
+    .audit-filters .form-group input, .audit-filters .form-group select { margin-bottom: 0; }
+    .audit-filters .date-range { display: flex; align-items: center; gap: 0.5rem; }
+    .audit-filters .date-sep { color: #6b7280; }
+    .sql-full { font-size: 0.8rem; white-space: pre-wrap; word-break: break-word; max-width: 480px; display: inline-block; vertical-align: top; text-align: left; }
+    .muted { color: #6b7280; }
+    @media (max-width: 768px) { .audit-filters .form-row-3 { grid-template-columns: 1fr; } }
+  </style>
+{% endblock %}
